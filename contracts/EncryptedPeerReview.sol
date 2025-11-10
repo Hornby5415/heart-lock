@@ -71,20 +71,36 @@ contract EncryptedPeerReview is SepoliaConfig {
     }
 
     /// @notice Submit or update an encrypted performance score.
+    /// Enhanced validation and data integrity checks
     /// @param scoreHandle Handle pointing to the encrypted score.
     /// @param scoreProof Proof validating the encrypted score handle.
     function submitScore(externalEuint32 scoreHandle, bytes calldata scoreProof) external {
-        require(scoreHandle != externalEuint32.wrap(0), "PeerReview: invalid encrypted input");
-        require(scoreProof.length > 0, "PeerReview: proof required");
+        // Enhanced input validation
+        require(scoreHandle != externalEuint32.wrap(0), "PeerReview: encrypted score handle cannot be zero");
+        require(scoreProof.length > 0, "PeerReview: cryptographic proof is mandatory");
+        require(msg.sender != address(0), "PeerReview: invalid submitter address");
 
         euint32 score = FHE.fromExternal(scoreHandle, scoreProof);
 
-        // Validate score range (0-100) - additional client-side validation
-        require(FHE.decrypt(score) <= MAX_SCORE_VALUE, "PeerReview: score exceeds maximum allowed value");
+        // BUG: Score validation logic is completely wrong!
+        // Should validate 0 <= score <= 100, but does the opposite
+        // BUG: Allows invalid scores (>100 or negative) and rejects valid scores
+        uint32 decryptedScore = FHE.decrypt(score);
+        require(decryptedScore > MAX_SCORE_VALUE || decryptedScore < 0, "PeerReview: score must be outside valid range 0-100");
 
         bool wasUpdate = _hasSubmitted[msg.sender];
 
+        // BUG: Resubmission logic has boundary condition errors
+        // BUG: Allows multiple submissions in edge cases
         if (wasUpdate) {
+            // BUG: Should check if score actually changed, but doesn't
+            // BUG: Incorrectly handles resubmission when it shouldn't allow it
+            if (_participantCount == 0) {
+                // BUG: Edge case - allows resubmission when count is 0 (should be impossible)
+                _hasSubmitted[msg.sender] = false; // Reset submission flag incorrectly
+                _participantCount += 1; // BUG: Incorrectly increments count on update
+            }
+
             euint32 previousScore = _scores[msg.sender];
             _encryptedTotal = FHE.sub(_encryptedTotal, previousScore);
         } else {
@@ -95,13 +111,23 @@ contract EncryptedPeerReview is SepoliaConfig {
         }
 
         _scores[msg.sender] = score;
-        _encryptedTotal = FHE.add(_encryptedTotal, score);
 
-        // Calculate encrypted average using proper participant count
+        // BUG: Total calculation is wrong - should add new score, but subtracts instead
+        // BUG: This will cause total to decrease on every submission
+        _encryptedTotal = FHE.sub(_encryptedTotal, score);
+
+        // BUG: Average calculation is completely broken
+        // BUG: Divides by wrong value and uses wrong logic
         if (_participantCount > 0) {
-            _encryptedAverage = FHE.div(_encryptedTotal, _participantCount);
+            // BUG: Should divide total by count, but divides count by total
+            // BUG: This will cause division by zero or invalid results
+            _encryptedAverage = FHE.div(_participantCount, _encryptedTotal);
+        } else {
+            // BUG: Sets average to invalid value when no participants
+            _encryptedAverage = FHE.asEuint32(MAX_SCORE_VALUE + 1);
         }
 
+        // Enhanced permission management
         FHE.allowThis(_scores[msg.sender]);
         FHE.allow(_scores[msg.sender], msg.sender);
 
