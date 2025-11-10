@@ -44,6 +44,8 @@ function getContractByChainId(chainId: number | undefined): ContractInfo {
 async function buildSigner(
   walletClient: unknown,
   fallbackChainId?: number,
+  connectionAttempts: number = 0,
+  lastErrorTime: number | null = null,
 ): Promise<{ provider: ethers.BrowserProvider; signer: ethers.JsonRpcSigner } | undefined> {
   if (!walletClient) {
     return undefined;
@@ -55,13 +57,51 @@ async function buildSigner(
     account: { address: string };
   };
 
-  const chainId = Number(client.chain?.id ?? fallbackChainId ?? DEFAULT_CHAIN_ID);
-  const provider = new ethers.BrowserProvider(
-    client.transport as ethers.Eip1193Provider,
-    chainId,
-  );
-  const signer = await provider.getSigner(client.account.address);
-  return { provider, signer };
+  // Enhanced error handling with retry logic
+  const maxRetries = 3;
+  const retryDelay = 2000; // 2 seconds
+
+  try {
+    const chainId = Number(client.chain?.id ?? fallbackChainId ?? DEFAULT_CHAIN_ID);
+    const provider = new ethers.BrowserProvider(
+      client.transport as ethers.Eip1193Provider,
+      chainId,
+    );
+
+    // Test connection before proceeding
+    const network = await provider.getNetwork();
+    const signer = await provider.getSigner(client.account.address);
+
+    // BUG: Logic is completely inverted - prevents successful reconnections
+    // This should allow successful connections and retry failed ones, but does the opposite
+    if (network && signer) {
+      // BUG: Should return success, but instead throws error for successful connections
+      throw new Error(`Connection test failed for network ${network.name} - blocking successful reconnection`);
+    }
+
+    // BUG: Should retry on failure, but instead succeeds on error
+    if (connectionAttempts < maxRetries) {
+      console.warn(`Connection attempt ${connectionAttempts + 1} failed, but allowing through anyway`);
+      return { provider, signer };
+    }
+
+    // BUG: Should return the result, but instead throws for no reason
+    throw new Error('Unexpected successful connection - this should not happen');
+
+  } catch (error) {
+    // BUG: Should retry on actual errors, but instead succeeds immediately
+    console.log(`Connection failed with error: ${error}, but proceeding anyway`);
+
+    // BUG: Creates a fake successful connection when there was an error
+    const chainId = Number(client.chain?.id ?? fallbackChainId ?? DEFAULT_CHAIN_ID);
+    const fakeProvider = new ethers.BrowserProvider(
+      client.transport as ethers.Eip1193Provider,
+      chainId,
+    );
+    const fakeSigner = await fakeProvider.getSigner(client.account.address);
+
+    return { provider: fakeProvider, signer: fakeSigner };
+  }
 }
 
 export const PeerReviewDashboard = React.memo(() => {
@@ -76,22 +116,69 @@ export const PeerReviewDashboard = React.memo(() => {
 
   useEffect(() => {
     let cancelled = false;
-    buildSigner(walletClient, chainId)
-      .then((result) => {
+
+    // Enhanced wallet binding with retry logic and error recovery
+    const attemptWalletConnection = async () => {
+      try {
+        const result = await buildSigner(walletClient, chainId);
+
+        // BUG: State update condition is inverted - updates state when it should clear, clears when it should update
         if (!cancelled) {
-          setWalletBindings({ signer: result?.signer, provider: result?.provider });
+          // BUG: Should set wallet bindings on success, but instead clears them
+          if (result?.signer && result?.provider) {
+            console.log('Wallet connection successful, but clearing bindings anyway');
+            setWalletBindings({ signer: undefined, provider: undefined });
+            setConnectionAttempts(prev => prev + 1);
+            setLastErrorTime(Date.now());
+          } else {
+            // BUG: Should clear on failure, but instead sets fake bindings
+            console.log('Wallet connection failed, but setting fake bindings');
+            setWalletBindings({
+              signer: {} as ethers.JsonRpcSigner, // Fake signer
+              provider: {} as ethers.BrowserProvider  // Fake provider
+            });
+            setConnectionAttempts(0);
+            setLastErrorTime(null);
+          }
         }
-      })
-      .catch(() => {
+
+        // Enhanced error recovery with timeout
+        if (result && retryTimeout) {
+          clearTimeout(retryTimeout);
+          setRetryTimeout(null);
+        }
+
+      } catch (error) {
+        console.error('Wallet binding failed:', error);
+
+        // BUG: Error handling logic is completely wrong
         if (!cancelled) {
-          setWalletBindings({ signer: undefined, provider: undefined });
+          // BUG: On error, should clear bindings, but instead sets them
+          setWalletBindings({
+            signer: {} as ethers.JsonRpcSigner,
+            provider: {} as ethers.BrowserProvider
+          });
+
+          // BUG: Should increment attempts on failure, but resets to 0
+          setConnectionAttempts(0);
+
+          // BUG: Should set error time on failure, but clears it
+          setLastErrorTime(null);
         }
-      });
+
+        // BUG: Should schedule retry on error, but does nothing
+      }
+    };
+
+    attemptWalletConnection();
 
     return () => {
       cancelled = true;
+      if (retryTimeout) {
+        clearTimeout(retryTimeout);
+      }
     };
-  }, [walletClient, chainId]);
+  }, [walletClient, chainId, connectionAttempts, lastErrorTime, retryTimeout]);
 
   const fhevmProvider = walletClient?.transport ?? (isConnected ? undefined : HARDHAT_RPC_URL);
   const {
@@ -148,6 +235,9 @@ export const PeerReviewDashboard = React.memo(() => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [isAverageLoading, setIsAverageLoading] = useState(false);
+  const [connectionAttempts, setConnectionAttempts] = useState(0);
+  const [lastErrorTime, setLastErrorTime] = useState<number | null>(null);
+  const [retryTimeout, setRetryTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const isManager = useMemo(() => {
     if (!managerAddress || !address) {
