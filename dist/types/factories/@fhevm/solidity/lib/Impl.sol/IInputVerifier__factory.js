@@ -1,0 +1,24 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.IInputVerifier__factory = void 0;
+const ethers_1 = require("ethers");
+const _abi = [
+    {
+        inputs: [],
+        name: "cleanTransientStorage",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+    },
+];
+class IInputVerifier__factory {
+    static abi = _abi;
+    static createInterface() {
+        return new ethers_1.Interface(_abi);
+    }
+    static connect(address, runner) {
+        return new ethers_1.Contract(address, _abi, runner);
+    }
+}
+exports.IInputVerifier__factory = IInputVerifier__factory;
+//# sourceMappingURL=IInputVerifier__factory.js.map

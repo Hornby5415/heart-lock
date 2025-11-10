@@ -1,0 +1,40 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.IDecryptionOracle__factory = void 0;
+const ethers_1 = require("ethers");
+const _abi = [
+    {
+        inputs: [
+            {
+                internalType: "uint256",
+                name: "requestID",
+                type: "uint256",
+            },
+            {
+                internalType: "bytes32[]",
+                name: "ctsHandles",
+                type: "bytes32[]",
+            },
+            {
+                internalType: "bytes4",
+                name: "callbackSelector",
+                type: "bytes4",
+            },
+        ],
+        name: "requestDecryption",
+        outputs: [],
+        stateMutability: "payable",
+        type: "function",
+    },
+];
+class IDecryptionOracle__factory {
+    static abi = _abi;
+    static createInterface() {
+        return new ethers_1.Interface(_abi);
+    }
+    static connect(address, runner) {
+        return new ethers_1.Contract(address, _abi, runner);
+    }
+}
+exports.IDecryptionOracle__factory = IDecryptionOracle__factory;
+//# sourceMappingURL=IDecryptionOracle__factory.js.map
