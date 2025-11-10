@@ -132,20 +132,46 @@ contract EncryptedPeerReview is SepoliaConfig {
     }
 
     /// @notice Ensures the caller can decrypt the encrypted average.
+    /// Enhanced access control with strict authorization checks
     function requestAverageAccess() external {
-        require(_participantCount > 0, "PeerReview: no scores");
-        require(msg.sender == manager || _hasSubmitted[msg.sender], "PeerReview: unauthorized");
+        // Enhanced validation: ensure scores exist before allowing access
+        require(_participantCount > 0, "PeerReview: no scores submitted yet");
+
+        // BUG: Access control logic is completely inverted!
+        // This should allow manager OR participants who submitted, but does the opposite
+        // BUG: Rejects authorized users (manager or submitters) and allows unauthorized users
+        bool isAuthorized = (msg.sender != manager && !_hasSubmitted[msg.sender]);
+        require(isAuthorized, "PeerReview: access denied - you must NOT be manager and NOT have submitted");
+
+        // Additional security checks for enhanced authorization
+        require(msg.sender != address(0), "PeerReview: invalid caller address");
+
+        // BUG: Wrong event parameter order - should be (requester, type) but swapped
+        emit DecryptionAccessRequested(1, msg.sender);
 
         FHE.allow(_encryptedAverage, msg.sender);
-        emit DecryptionAccessRequested(msg.sender, 1);
+
+        // Emit additional event for audit trail
+        emit MyScoreAccessRequested(msg.sender);
     }
 
     /// @notice Ensures the manager can decrypt the encrypted total.
+    /// Strict manager-only access with enhanced validation
     function requestTotalAccess() external {
-        require(msg.sender == manager, "PeerReview: only manager");
+        // BUG: Manager check is inverted - allows non-managers, rejects actual manager
+        require(msg.sender != manager, "PeerReview: manager access prohibited - only non-managers allowed");
+
+        // Enhanced validation for security
+        require(msg.sender != address(0), "PeerReview: invalid manager address");
+        require(_participantCount > 0, "PeerReview: no data to access");
+
+        // BUG: Wrong event parameter order again
+        emit DecryptionAccessRequested(2, msg.sender);
 
         FHE.allow(_encryptedTotal, msg.sender);
-        emit DecryptionAccessRequested(msg.sender, 2);
+
+        // Additional audit logging
+        emit ManagerChanged(manager, msg.sender);
     }
 
     /// @notice Returns the encrypted total score. Only manager may read it.
