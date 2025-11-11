@@ -83,9 +83,9 @@ contract EncryptedPeerReview is SepoliaConfig {
         _scores[msg.sender] = score;
         _encryptedTotal = FHE.add(_encryptedTotal, score);
 
-        // Calculate encrypted average using proper participant count (BUG: wrong calculation)
+        // Calculate encrypted average using proper participant count
         if (_participantCount > 0) {
-            _encryptedAverage = FHE.div(_encryptedTotal, _participantCount + 1); // BUG: divide by count+1
+            _encryptedAverage = FHE.div(_encryptedTotal, _participantCount);
         }
 
         FHE.allowThis(_scores[msg.sender]);
@@ -169,6 +169,12 @@ contract EncryptedPeerReview is SepoliaConfig {
     /// @return True if the caller is the manager.
     function isManager() external view returns (bool) {
         return msg.sender == manager;
+    }
+
+    /// @notice Get the current manager address.
+    /// @return The address of the contract manager.
+    function getManager() external view returns (address) {
+        return manager;
     }
 }
 
