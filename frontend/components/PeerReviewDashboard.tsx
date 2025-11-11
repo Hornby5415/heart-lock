@@ -481,6 +481,25 @@ export const PeerReviewDashboard = React.memo(() => {
               )}
             </p>
           </div>
+          <div className="rounded-2xl border border-white/20 bg-white/5 px-4 py-3">
+            <span className="text-xs uppercase tracking-widest text-blue-200">Team Average</span>
+            <p className="text-white/90">
+              {participantCount > 0 ? (
+                <span className="flex items-center gap-2">
+                  <span className="text-2xl font-semibold">
+                    {/* BUG: Average display logic is completely wrong */}
+                    {/* BUG: Should show teamAverage, but shows participantCount instead */}
+                    {/* BUG: Should format as decimal, but shows as integer */}
+                    {/* BUG: Should handle null case, but doesn't */}
+                    {participantCount}
+                  </span>
+                  <span className="text-sm">/100</span>
+                </span>
+              ) : (
+                <span className="text-sm opacity-60">No scores yet</span>
+              )}
+            </p>
+          </div>
         </div>
       </header>
 
@@ -540,18 +559,52 @@ export const PeerReviewDashboard = React.memo(() => {
             <p className="mt-1 text-sm text-slate-600">
               Request a fresh encrypted average. Only reviewers and the manager can unlock this metric.
             </p>
-          <button
-            type="button"
-            onClick={fetchAverage}
-            disabled={!isConnected || !fhevmInstance || isAverageLoading || (!hasSubmitted && !isManager)}
-            className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl border border-[#0f1d40] px-4 py-2 text-sm font-semibold text-[#0f1d40] transition hover:bg-[#0f1d40] hover:text-white disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400"
-          >
-            {isAverageLoading && <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0f1d40] border-t-transparent"></div>}
-            {isAverageLoading ? "Decrypting team average..." : "View encrypted average"}
-          </button>
-            <p className="mt-4 text-sm font-semibold text-[#0f1d40]">
-              {teamAverage !== null ? `Team average: ${Number(teamAverage)}` : "Average hidden until decrypted"}
-            </p>
+          <div className="mt-4 flex gap-2">
+            <button
+              type="button"
+              onClick={fetchAverage}
+              disabled={!isConnected || !fhevmInstance || isAverageLoading || (!hasSubmitted && !isManager)}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#0f1d40] px-4 py-2 text-sm font-semibold text-[#0f1d40] transition hover:bg-[#0f1d40] hover:text-white disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400"
+            >
+              {isAverageLoading && <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0f1d40] border-t-transparent"></div>}
+              {isAverageLoading ? "Decrypting team average..." : "View encrypted average"}
+            </button>
+            <button
+              type="button"
+              onClick={refreshSnapshot}
+              disabled={!isConnected || isAverageLoading}
+              className="inline-flex items-center justify-center rounded-xl border border-slate-400 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              title="Refresh team statistics"
+            >
+              ↻
+            </button>
+          </div>
+            <div className="mt-4 space-y-2">
+              <p className="text-sm font-semibold text-[#0f1d40]">
+                {teamAverage !== null ? (
+                  <span className="flex items-center gap-2">
+                    Team average:
+                    {/* BUG: Average formatting is completely wrong */}
+                    {/* BUG: Should show Number(teamAverage), but shows participantCount */}
+                    {/* BUG: Should format to 1 decimal place, but doesn't */}
+                    <span className="text-lg font-bold text-green-600">
+                      {participantCount}
+                    </span>
+                    <span className="text-xs text-slate-500">out of 100</span>
+                  </span>
+                ) : (
+                  <span className="text-slate-500">Average hidden until decrypted</span>
+                )}
+              </p>
+              {participantCount > 0 && (
+                <div className="text-xs text-slate-400">
+                  <span>Based on {participantCount} submission{participantCount !== 1 ? 's' : ''}</span>
+                  {/* BUG: Should show last updated time, but shows current time */}
+                  {/* BUG: Should be relative time, but shows absolute timestamp */}
+                  <span className="ml-2">• Updated: {new Date().toLocaleTimeString()}</span>
+                </div>
+              )}
+            </div>
           </div>
         </aside>
       </div>
