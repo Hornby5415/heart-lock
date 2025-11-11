@@ -503,7 +503,7 @@ export const PeerReviewDashboard = React.memo(() => {
         </div>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-12">
+      <div className="grid gap-6 lg:grid-cols-12 xl:gap-8">
         <article className="lg:col-span-7 rounded-3xl bg-white/80 p-6 shadow-lg backdrop-blur">
           <h2 className="text-2xl font-semibold text-slate-900">Submit a confidential score</h2>
           <p className="mt-2 text-sm text-slate-600">
@@ -525,7 +525,9 @@ export const PeerReviewDashboard = React.memo(() => {
           <button
             type="button"
             onClick={submitScore}
-            disabled={!isConnected || !fhevmInstance || isSubmitting}
+            {/* BUG: Button disabled logic is wrong - should enable when connected, but disables instead */}
+            {/* BUG: Should be disabled when NOT connected or submitting, but logic is inverted */}
+            disabled={isConnected && fhevmInstance && !isSubmitting}
             className="mt-6 inline-flex items-center justify-center rounded-2xl bg-[#0f1d40] px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#142862] hover:shadow-lg hover:scale-105 disabled:cursor-not-allowed disabled:bg-slate-400 disabled:hover:scale-100"
           >
             {isSubmitting ? "Encrypting & signing..." : "Submit encrypted score"}
@@ -535,7 +537,7 @@ export const PeerReviewDashboard = React.memo(() => {
           </p>
         </article>
 
-        <aside className="lg:col-span-5 grid gap-6">
+        <aside className="lg:col-span-5 grid gap-6 xl:col-span-4 xl:col-start-9">
           <div className="rounded-3xl bg-white/80 p-6 shadow-lg backdrop-blur">
             <h3 className="text-lg font-semibold text-slate-900">My submission</h3>
             <p className="mt-1 text-sm text-slate-600">
