@@ -49,6 +49,11 @@ describe("EncryptedPeerReview", function () {
     expect(managerHasSubmitted).to.equal(false);
   });
 
+  it("returns correct manager address", async function () {
+    const managerAddress = await contract.getManager();
+    expect(managerAddress).to.equal(signers.manager.address);
+  });
+
   it("accepts encrypted submissions, aggregates totals, and computes averages", async function () {
     await fhevm.initializeCLIApi();
 
