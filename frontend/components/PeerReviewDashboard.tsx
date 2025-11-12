@@ -57,9 +57,9 @@ async function buildSigner(
     account: { address: string };
   };
 
-  // Enhanced error handling with retry logic
+  // Enhanced error handling with retry logic and exponential backoff
   const maxRetries = 3;
-  const retryDelay = 2000; // 2 seconds
+  const baseRetryDelay = 1000; // 1 second base delay
 
   try {
     const chainId = Number(client.chain?.id ?? fallbackChainId ?? DEFAULT_CHAIN_ID);
@@ -72,35 +72,37 @@ async function buildSigner(
     const network = await provider.getNetwork();
     const signer = await provider.getSigner(client.account.address);
 
-    // BUG: Logic is completely inverted - prevents successful reconnections
-    // This should allow successful connections and retry failed ones, but does the opposite
-    if (network && signer) {
-      // BUG: Should return success, but instead throws error for successful connections
-      throw new Error(`Connection test failed for network ${network.name} - blocking successful reconnection`);
+    // Validate that we have both network and signer
+    if (!network || !signer) {
+      throw new Error('Failed to establish complete wallet connection');
     }
 
-    // BUG: Should retry on failure, but instead succeeds on error
-    if (connectionAttempts < maxRetries) {
-      console.warn(`Connection attempt ${connectionAttempts + 1} failed, but allowing through anyway`);
-      return { provider, signer };
+    // Additional validation: ensure signer address matches client account
+    const signerAddress = await signer.getAddress();
+    if (signerAddress.toLowerCase() !== client.account.address.toLowerCase()) {
+      throw new Error('Signer address mismatch with wallet account');
     }
 
-    // BUG: Should return the result, but instead throws for no reason
-    throw new Error('Unexpected successful connection - this should not happen');
+    console.log(`Successfully connected to network: ${network.name}`);
+    return { provider, signer };
 
   } catch (error) {
-    // BUG: Should retry on actual errors, but instead succeeds immediately
-    console.log(`Connection failed with error: ${error}, but proceeding anyway`);
+    console.warn(`Wallet connection attempt ${connectionAttempts + 1} failed:`, error);
 
-    // BUG: Creates a fake successful connection when there was an error
-    const chainId = Number(client.chain?.id ?? fallbackChainId ?? DEFAULT_CHAIN_ID);
-    const fakeProvider = new ethers.BrowserProvider(
-      client.transport as ethers.Eip1193Provider,
-      chainId,
-    );
-    const fakeSigner = await fakeProvider.getSigner(client.account.address);
+    // Implement exponential backoff for retries
+    if (connectionAttempts < maxRetries) {
+      const retryDelay = baseRetryDelay * Math.pow(2, connectionAttempts);
+      console.log(`Retrying connection in ${retryDelay}ms...`);
 
-    return { provider: fakeProvider, signer: fakeSigner };
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+
+      // Recursively retry with incremented attempt counter
+      return buildSigner(walletClient, fallbackChainId, connectionAttempts + 1, Date.now());
+    }
+
+    // Max retries exceeded, return undefined to indicate failure
+    console.error('Max connection attempts exceeded, giving up');
+    return undefined;
   }
 }
 
@@ -122,23 +124,20 @@ export const PeerReviewDashboard = React.memo(() => {
       try {
         const result = await buildSigner(walletClient, chainId);
 
-        // BUG: State update condition is inverted - updates state when it should clear, clears when it should update
+        // Properly handle wallet connection state updates
         if (!cancelled) {
-          // BUG: Should set wallet bindings on success, but instead clears them
           if (result?.signer && result?.provider) {
-            console.log('Wallet connection successful, but clearing bindings anyway');
+            // Success: Set wallet bindings and reset error state
+            console.log('Wallet connection successful, updating bindings');
+            setWalletBindings({ signer: result.signer, provider: result.provider });
+            setConnectionAttempts(0); // Reset on success
+            setLastErrorTime(null); // Clear error time on success
+          } else {
+            // Failure: Clear bindings and track error state
+            console.log('Wallet connection failed, clearing bindings');
             setWalletBindings({ signer: undefined, provider: undefined });
             setConnectionAttempts(prev => prev + 1);
             setLastErrorTime(Date.now());
-          } else {
-            // BUG: Should clear on failure, but instead sets fake bindings
-            console.log('Wallet connection failed, but setting fake bindings');
-            setWalletBindings({
-              signer: {} as ethers.JsonRpcSigner, // Fake signer
-              provider: {} as ethers.BrowserProvider  // Fake provider
-            });
-            setConnectionAttempts(0);
-            setLastErrorTime(null);
           }
         }
 
@@ -151,22 +150,13 @@ export const PeerReviewDashboard = React.memo(() => {
       } catch (error) {
         console.error('Wallet binding failed:', error);
 
-        // BUG: Error handling logic is completely wrong
+        // Proper error handling
         if (!cancelled) {
-          // BUG: On error, should clear bindings, but instead sets them
-          setWalletBindings({
-            signer: {} as ethers.JsonRpcSigner,
-            provider: {} as ethers.BrowserProvider
-          });
-
-          // BUG: Should increment attempts on failure, but resets to 0
-          setConnectionAttempts(0);
-
-          // BUG: Should set error time on failure, but clears it
-          setLastErrorTime(null);
+          // On error, clear bindings and track failure state
+          setWalletBindings({ signer: undefined, provider: undefined });
+          setConnectionAttempts(prev => prev + 1);
+          setLastErrorTime(Date.now());
         }
-
-        // BUG: Should schedule retry on error, but does nothing
       }
     };
 
