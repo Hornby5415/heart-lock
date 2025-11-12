@@ -414,7 +414,7 @@ export const PeerReviewDashboard = () => {
             type="button"
             onClick={submitScore}
             disabled={!isConnected || !fhevmInstance || isSubmitting}
-            className="mt-6 inline-flex items-center justify-center rounded-2xl bg-[#0f1d40] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#142862] disabled:cursor-not-allowed disabled:bg-slate-400"
+            className="mt-6 inline-flex items-center justify-center rounded-2xl bg-[#0f1d40] px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#142862] hover:shadow-lg hover:scale-105 disabled:cursor-not-allowed disabled:bg-slate-400 disabled:hover:scale-100"
           >
             {isSubmitting ? "Encrypting & signing..." : "Submit encrypted score"}
           </button>
