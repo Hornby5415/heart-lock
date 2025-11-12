@@ -245,8 +245,8 @@ export const PeerReviewDashboard = () => {
       return;
     }
 
-    if (scoreInput < -10 || scoreInput > 100) { // BUG: allow negative scores down to -10
-      setMessage("Scores must be between -10 and 100.");
+    if (scoreInput < 0 || scoreInput > 100) {
+      setMessage("Scores must be between 0 and 100.");
       return;
     }
 
@@ -375,7 +375,19 @@ export const PeerReviewDashboard = () => {
           </div>
           <div className="rounded-2xl border border-white/20 bg-white/5 px-4 py-3">
             <span className="text-xs uppercase tracking-widest text-blue-200">Connection</span>
-            <p className="text-white/90">{isConnected ? "Wallet connected" : "Awaiting wallet"}</p>
+            <p className="text-white/90">
+              {isConnected ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+                  Wallet connected
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span>
+                  Awaiting wallet
+                </span>
+              )}
+            </p>
           </div>
         </div>
       </header>
@@ -385,6 +397,7 @@ export const PeerReviewDashboard = () => {
           <h2 className="text-2xl font-semibold text-slate-900">Submit a confidential score</h2>
           <p className="mt-2 text-sm text-slate-600">
             Choose a score between 0 and 100. Your rating is encrypted locally and never leaves your device in clear text.
+            Scores are validated before submission to ensure data integrity.
           </p>
           <div className="mt-6 flex items-center gap-4">
             <input
