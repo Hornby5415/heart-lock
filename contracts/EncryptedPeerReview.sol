@@ -12,6 +12,7 @@ import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 /// @notice Keeps encrypted running totals and averages accessible only to authorized decryptors
 /// @notice Uses Zama FHEVM for encrypted computations on-chain
 /// @dev Implements access control for decryption permissions based on submission status
+/// @dev Contract manager can access total scores, participants can access averages and their own scores
 contract EncryptedPeerReview is SepoliaConfig {
     /// @dev Maximum allowed score value
     uint32 private constant MAX_SCORE = 100;
