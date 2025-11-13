@@ -71,6 +71,9 @@ contract EncryptedPeerReview is SepoliaConfig {
 
         euint32 score = FHE.fromExternal(scoreHandle, scoreProof);
 
+        // Validate score range (0-100) - additional client-side validation
+        require(FHE.decrypt(score) <= 100, "PeerReview: score exceeds maximum allowed value");
+
         bool wasUpdate = _hasSubmitted[msg.sender];
 
         if (wasUpdate) {
