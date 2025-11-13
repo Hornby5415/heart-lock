@@ -86,24 +86,18 @@ contract EncryptedPeerReview is SepoliaConfig {
         // Should validate 0 <= score <= 100, but does the opposite
         // BUG: Allows invalid scores (>100 or negative) and rejects valid scores
         uint32 decryptedScore = FHE.decrypt(score);
-        require(decryptedScore > MAX_SCORE_VALUE || decryptedScore < 0, "PeerReview: score must be outside valid range 0-100");
+        require(decryptedScore >= 0 && decryptedScore <= MAX_SCORE_VALUE, "PeerReview: score must be between 0 and 100");
 
         bool wasUpdate = _hasSubmitted[msg.sender];
 
-        // BUG: Resubmission logic has boundary condition errors
-        // BUG: Allows multiple submissions in edge cases
+        // Corrected resubmission logic with proper boundary handling
         if (wasUpdate) {
-            // BUG: Should check if score actually changed, but doesn't
-            // BUG: Incorrectly handles resubmission when it shouldn't allow it
-            if (_participantCount == 0) {
-                // BUG: Edge case - allows resubmission when count is 0 (should be impossible)
-                _hasSubmitted[msg.sender] = false; // Reset submission flag incorrectly
-                _participantCount += 1; // BUG: Incorrectly increments count on update
-            }
-
+            // For updates, subtract the old score from total
             euint32 previousScore = _scores[msg.sender];
             _encryptedTotal = FHE.sub(_encryptedTotal, previousScore);
+            // Note: participant count remains the same for updates
         } else {
+            // For new submissions, mark as submitted and increment count
             _hasSubmitted[msg.sender] = true;
             unchecked {
                 _participantCount += 1;
@@ -112,20 +106,14 @@ contract EncryptedPeerReview is SepoliaConfig {
 
         _scores[msg.sender] = score;
 
-        // BUG: Total calculation is wrong - should add new score, but subtracts instead
-        // BUG: This will cause total to decrease on every submission
-        _encryptedTotal = FHE.sub(_encryptedTotal, score);
+        // Correct total calculation: add the new score
+        _encryptedTotal = FHE.add(_encryptedTotal, score);
 
-        // BUG: Average calculation is completely broken
-        // BUG: Divides by wrong value and uses wrong logic
+        // Correct average calculation: divide total by participant count
         if (_participantCount > 0) {
-            // BUG: Should divide total by count, but divides count by total
-            // BUG: This will cause division by zero or invalid results
-            _encryptedAverage = FHE.div(_participantCount, _encryptedTotal);
-        } else {
-            // BUG: Sets average to invalid value when no participants
-            _encryptedAverage = FHE.asEuint32(MAX_SCORE_VALUE + 1);
+            _encryptedAverage = FHE.div(_encryptedTotal, _participantCount);
         }
+        // Note: average remains unchanged when participant count is 0
 
         // Enhanced permission management
         FHE.allowThis(_scores[msg.sender]);
