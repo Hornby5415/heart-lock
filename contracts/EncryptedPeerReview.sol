@@ -48,6 +48,11 @@ contract EncryptedPeerReview is SepoliaConfig {
     /// @param participant Address requesting access to their score.
     event MyScoreAccessRequested(address indexed participant);
 
+    /// @notice Emitted when contract manager changes.
+    /// @param oldManager Previous manager address.
+    /// @param newManager New manager address.
+    event ManagerChanged(address indexed oldManager, address indexed newManager);
+
     /// @notice Sets the contract deployer as the manager and initialises totals.
     constructor() {
         manager = msg.sender;
