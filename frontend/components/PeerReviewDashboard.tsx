@@ -268,7 +268,9 @@ export const PeerReviewDashboard = () => {
       setMyScore(null);
       setTeamAverage(null);
     } catch (error) {
-      setMessage(`Failed to submit score: ${error instanceof Error ? error.message : String(error)}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Score submission failed:", error);
+      setMessage(`Failed to submit score: ${errorMessage}. Please check your wallet connection and try again.`);
     } finally {
       setIsSubmitting(false);
     }
