@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ethers } from "ethers";
 import { useAccount, useWalletClient } from "wagmi";
 
@@ -64,7 +64,7 @@ async function buildSigner(
   return { provider, signer };
 }
 
-export const PeerReviewDashboard = () => {
+export const PeerReviewDashboard = React.memo(() => {
   const { storage: fhevmDecryptionSignatureStorage } = useInMemoryStorage();
   const { address, isConnected, chainId } = useAccount();
   const { data: walletClient } = useWalletClient();
@@ -487,7 +487,7 @@ export const PeerReviewDashboard = () => {
       </footer>
     </section>
   );
-};
+});
 
 
 // Commit marker: add_ui - 2025-11-03T11:30:00-08:00
