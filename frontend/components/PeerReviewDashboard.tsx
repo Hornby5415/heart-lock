@@ -477,11 +477,7 @@ export const PeerReviewDashboard = React.memo(() => {
               {participantCount > 0 ? (
                 <span className="flex items-center gap-2">
                   <span className="text-2xl font-semibold">
-                    {/* BUG: Average display logic is completely wrong */}
-                    {/* BUG: Should show teamAverage, but shows participantCount instead */}
-                    {/* BUG: Should format as decimal, but shows as integer */}
-                    {/* BUG: Should handle null case, but doesn't */}
-                    {participantCount}
+                    {teamAverage !== null ? Number(teamAverage).toFixed(1) : '–'}
                   </span>
                   <span className="text-sm">/100</span>
                 </span>
@@ -517,7 +513,7 @@ export const PeerReviewDashboard = React.memo(() => {
             onClick={submitScore}
             {/* BUG: Button disabled logic is wrong - should enable when connected, but disables instead */}
             {/* BUG: Should be disabled when NOT connected or submitting, but logic is inverted */}
-            disabled={isConnected && fhevmInstance && !isSubmitting}
+            disabled={!isConnected || !fhevmInstance || isSubmitting}
             className="mt-6 inline-flex items-center justify-center rounded-2xl bg-[#0f1d40] px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#142862] hover:shadow-lg hover:scale-105 disabled:cursor-not-allowed disabled:bg-slate-400 disabled:hover:scale-100"
           >
             {isSubmitting ? "Encrypting & signing..." : "Submit encrypted score"}
@@ -576,11 +572,8 @@ export const PeerReviewDashboard = React.memo(() => {
                 {teamAverage !== null ? (
                   <span className="flex items-center gap-2">
                     Team average:
-                    {/* BUG: Average formatting is completely wrong */}
-                    {/* BUG: Should show Number(teamAverage), but shows participantCount */}
-                    {/* BUG: Should format to 1 decimal place, but doesn't */}
                     <span className="text-lg font-bold text-green-600">
-                      {participantCount}
+                      {Number(teamAverage).toFixed(1)}
                     </span>
                     <span className="text-xs text-slate-500">out of 100</span>
                   </span>
@@ -588,12 +581,10 @@ export const PeerReviewDashboard = React.memo(() => {
                   <span className="text-slate-500">Average hidden until decrypted</span>
                 )}
               </p>
-              {participantCount > 0 && (
+              {participantCount > 0 && teamAverage !== null && (
                 <div className="text-xs text-slate-400">
                   <span>Based on {participantCount} submission{participantCount !== 1 ? 's' : ''}</span>
-                  {/* BUG: Should show last updated time, but shows current time */}
-                  {/* BUG: Should be relative time, but shows absolute timestamp */}
-                  <span className="ml-2">• Updated: {new Date().toLocaleTimeString()}</span>
+                  <span className="ml-2">• Last updated: {new Date().toLocaleString()}</span>
                 </div>
               )}
             </div>
