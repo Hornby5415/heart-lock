@@ -50,6 +50,13 @@ export default {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+        cipher: {
+          50: "#f0f4ff",
+          100: "#e0e7ff",
+          500: "#6366f1",
+          600: "#4f46e5",
+          900: "#312e81",
+        },
       },
       backgroundImage: {
         noise: "url('/noise.svg')",
