@@ -408,6 +408,7 @@ export const PeerReviewDashboard = React.memo(() => {
               max={100}
               value={scoreInput}
               onChange={(event) => setScoreInput(Number(event.target.value))}
+              aria-label={`Score input: ${scoreInput} out of 100`}
               className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200"
             />
             <span className="w-12 text-center text-xl font-semibold text-[#0f1d40]">{scoreInput}</span>
