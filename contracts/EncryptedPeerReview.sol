@@ -34,6 +34,9 @@ contract EncryptedPeerReview is SepoliaConfig {
     /// @dev Marks whether a participant has already submitted a score.
     mapping(address => bool) private _hasSubmitted;
 
+    /// @dev Maximum allowed score value (constant for validation).
+    uint32 private constant MAX_SCORE_VALUE = 100;
+
     /// @notice Emitted whenever a participant submits or updates their score.
     /// @param reviewer Address of the participant submitting the score.
     /// @param updated Indicates whether the submission overwrote a previous score.
@@ -77,7 +80,7 @@ contract EncryptedPeerReview is SepoliaConfig {
         euint32 score = FHE.fromExternal(scoreHandle, scoreProof);
 
         // Validate score range (0-100) - additional client-side validation
-        require(FHE.decrypt(score) <= 100, "PeerReview: score exceeds maximum allowed value");
+        require(FHE.decrypt(score) <= MAX_SCORE_VALUE, "PeerReview: score exceeds maximum allowed value");
 
         bool wasUpdate = _hasSubmitted[msg.sender];
 
