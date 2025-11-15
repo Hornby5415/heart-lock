@@ -450,14 +450,15 @@ export const PeerReviewDashboard = React.memo(() => {
             <p className="mt-1 text-sm text-slate-600">
               Request a fresh encrypted average. Only reviewers and the manager can unlock this metric.
             </p>
-            <button
-              type="button"
-              onClick={fetchAverage}
-              disabled={!isConnected || !fhevmInstance || isAverageLoading || (!hasSubmitted && !isManager)}
-              className="mt-4 inline-flex items-center justify-center rounded-xl border border-[#0f1d40] px-4 py-2 text-sm font-semibold text-[#0f1d40] transition hover:bg-[#0f1d40] hover:text-white disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400"
-            >
-              {isAverageLoading ? "Decrypting team average..." : "View encrypted average"}
-            </button>
+          <button
+            type="button"
+            onClick={fetchAverage}
+            disabled={!isConnected || !fhevmInstance || isAverageLoading || (!hasSubmitted && !isManager)}
+            className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl border border-[#0f1d40] px-4 py-2 text-sm font-semibold text-[#0f1d40] transition hover:bg-[#0f1d40] hover:text-white disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400"
+          >
+            {isAverageLoading && <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0f1d40] border-t-transparent"></div>}
+            {isAverageLoading ? "Decrypting team average..." : "View encrypted average"}
+          </button>
             <p className="mt-4 text-sm font-semibold text-[#0f1d40]">
               {teamAverage !== null ? `Team average: ${Number(teamAverage)}` : "Average hidden until decrypted"}
             </p>
