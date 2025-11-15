@@ -89,7 +89,9 @@ contract EncryptedPeerReview is SepoliaConfig {
             _encryptedTotal = FHE.sub(_encryptedTotal, previousScore);
         } else {
             _hasSubmitted[msg.sender] = true;
-            _participantCount += 1;
+            unchecked {
+                _participantCount += 1;
+            }
         }
 
         _scores[msg.sender] = score;
