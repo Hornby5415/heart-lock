@@ -8,7 +8,7 @@ CipherScore is an FHE-enabled peer review workflow that lets teammates exchange 
 
 - Production dApp: [heart-lock.vercel.app](https://heart-lock.vercel.app/)
 - Preview build: [heart-lock-git-master-waws-projects-2bccbfbd.vercel.app](https://heart-lock-git-master-waws-projects-2bccbfbd.vercel.app)
-- Demo video (~6 MB): [private.mp4](./private.mp4)
+- Demo video (~3.6 MB): [demo.mp4](./demo.mp4)
 - Core contract: [`contracts/EncryptedPeerReview.sol`](contracts/EncryptedPeerReview.sol)
 - GitHub repository: [https://github.com/Hornby5415/heart-lock](https://github.com/Hornby5415/heart-lock)
 
