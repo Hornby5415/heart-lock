@@ -228,6 +228,7 @@ export const PeerReviewDashboard = React.memo(() => {
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const [lastErrorTime, setLastErrorTime] = useState<number | null>(null);
   const [retryTimeout, setRetryTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [lastActivity, setLastActivity] = useState<number>(Date.now());
 
   const isManager = useMemo(() => {
     if (!managerAddress || !address) {
