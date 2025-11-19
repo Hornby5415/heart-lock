@@ -14,8 +14,12 @@ import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 /// @dev Implements access control for decryption permissions based on submission status
 /// @dev Contract manager can access total scores, participants can access averages and their own scores
 contract EncryptedPeerReview is SepoliaConfig {
-    /// @dev Maximum allowed score value
+    /// @dev Maximum allowed score value (0-100 range)
     uint32 private constant MAX_SCORE = 100;
+
+    /// @dev Minimum allowed score value
+    uint32 private constant MIN_SCORE = 0;
+
     /// @notice Address with permission to retrieve the encrypted total score.
     address public immutable manager;
 
