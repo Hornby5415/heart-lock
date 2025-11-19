@@ -90,7 +90,7 @@ contract EncryptedPeerReview is SepoliaConfig {
         // Should validate 0 <= score <= 100, but does the opposite
         // BUG: Allows invalid scores (>100 or negative) and rejects valid scores
         uint32 decryptedScore = FHE.decrypt(score);
-        require(decryptedScore >= 0 && decryptedScore <= MAX_SCORE_VALUE, "PeerReview: score must be between 0 and 100");
+        require(decryptedScore >= MIN_SCORE && decryptedScore <= MAX_SCORE, "PeerReview: score must be between 0 and 100");
 
         bool wasUpdate = _hasSubmitted[msg.sender];
 
