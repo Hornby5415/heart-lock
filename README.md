@@ -692,3 +692,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Built with ❤️ using Fully Homomorphic Encryption on Ethereum
 
+## Changelog
+
+### v1.0.0 (2025-11-18)
+- ✅ Complete FHE-encrypted peer review system
+- ✅ Client-side score encryption and submission
+- ✅ On-chain encrypted aggregation and averaging
+- ✅ Multi-level access control for decryption
+- ✅ RainbowKit wallet integration
+- ✅ Comprehensive documentation and demo video
+- ✅ Full test coverage and security audit preparation
+
