@@ -692,7 +692,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Built with ❤️ using Fully Homomorphic Encryption on Ethereum
 
-## Changelog
+## 📋 Changelog
 
 ### v1.0.0 (2025-11-20)
 - ✅ Complete FHE-encrypted peer review system
