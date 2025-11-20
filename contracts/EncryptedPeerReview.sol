@@ -60,7 +60,7 @@ contract EncryptedPeerReview is SepoliaConfig {
     /// @param newManager New manager address.
     event ManagerChanged(address indexed oldManager, address indexed newManager);
 
-    /// @notice Sets the contract deployer as the manager and initialises totals.
+    /// @notice Initializes the contract with deployer as manager and zero totals.
     constructor() {
         manager = msg.sender;
 
