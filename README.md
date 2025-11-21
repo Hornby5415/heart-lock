@@ -694,7 +694,7 @@ Built with ❤️ using Fully Homomorphic Encryption on Ethereum
 
 ## Changelog
 
-### v1.0.0 (2025-11-18)
+### v1.0.0 (2025-11-20)
 - ✅ Complete FHE-encrypted peer review system
 - ✅ Client-side score encryption and submission
 - ✅ On-chain encrypted aggregation and averaging
