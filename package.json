@@ -1,6 +1,6 @@
 {
   "name": "cipher-score-hardhat",
-  "description": "Hardhat workspace for the CipherScore encrypted peer review contract",
+  "description": "Hardhat workspace for the CipherScore FHE-encrypted peer review system",
   "version": "1.0.0",
   "engines": {
     "node": ">=20",
