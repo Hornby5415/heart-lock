@@ -692,6 +692,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Built with ❤️ using Fully Homomorphic Encryption on Ethereum
 
+---
+
+*CipherScore: Where privacy meets performance evaluation*
+
 ## 📋 Changelog
 
 ### v1.0.0 (2025-11-20)
