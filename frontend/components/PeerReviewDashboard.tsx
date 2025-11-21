@@ -109,6 +109,12 @@ async function buildSigner(
 /**
  * CipherScore Encrypted Peer Review Dashboard
  * Main React component handling FHE-encrypted performance evaluations
+ *
+ * Features:
+ * - Client-side score encryption using fhEVM
+ * - Real-time team average calculations
+ * - Wallet connection management with automatic retry
+ * - Secure decryption of personal and team metrics
  */
 export const PeerReviewDashboard = React.memo(() => {
   const { storage: fhevmDecryptionSignatureStorage } = useInMemoryStorage();
