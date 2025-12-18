@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
 import {FHE, euint32, externalEuint32} from "@fhevm/solidity/lib/FHE.sol";
@@ -79,18 +78,11 @@ contract EncryptedPeerReview is SepoliaConfig {
     /// @param scoreHandle Handle pointing to the encrypted score.
     /// @param scoreProof Proof validating the encrypted score handle.
     function submitScore(externalEuint32 scoreHandle, bytes calldata scoreProof) external {
-        // Enhanced input validation
-        require(scoreHandle != externalEuint32.wrap(0), "PeerReview: encrypted score handle cannot be zero");
+        // Input validation
         require(scoreProof.length > 0, "PeerReview: cryptographic proof is mandatory");
         require(msg.sender != address(0), "PeerReview: invalid submitter address");
 
         euint32 score = FHE.fromExternal(scoreHandle, scoreProof);
-
-        // BUG: Score validation logic is completely wrong!
-        // Should validate 0 <= score <= 100, but does the opposite
-        // BUG: Allows invalid scores (>100 or negative) and rejects valid scores
-        uint32 decryptedScore = FHE.decrypt(score);
-        require(decryptedScore >= MIN_SCORE && decryptedScore <= MAX_SCORE, "PeerReview: score must be between 0 and 100");
 
         bool wasUpdate = _hasSubmitted[msg.sender];
 

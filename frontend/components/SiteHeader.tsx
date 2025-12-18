@@ -11,7 +11,7 @@ export const SiteHeader = () => {
         <Image src="/cipherscore-logo.svg" width={44} height={44} alt="CipherScore" priority />
         <div className="leading-tight">
           <p className="text-sm uppercase tracking-[0.32em] text-slate-500">CipherScore</p>
-          <p className="text-base font-semibold text-[#0f1d40]">Encrypted Peer Review</p>
+          <p className="text-base font-semibold text-[#0f1d40]">Academic Peer Review</p>
         </div>
       </Link>
       <div className="flex items-center gap-2">

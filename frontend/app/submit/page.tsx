@@ -2,14 +2,15 @@
 
 import { usePathname } from "next/navigation";
 import { PageTransition } from "@/components/PageTransition";
-import { DashboardPage } from "@/components/pages/DashboardPage";
+import { SubmitPage } from "@/components/pages/SubmitPage";
 
-export default function Home() {
+export default function SubmitPageRoute() {
   const pathname = usePathname();
 
   return (
-    <PageTransition pathname={pathname || "/"}>
-      <DashboardPage />
+    <PageTransition pathname={pathname || "/submit"}>
+      <SubmitPage />
     </PageTransition>
   );
 }
+

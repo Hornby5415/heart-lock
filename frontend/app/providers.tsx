@@ -42,6 +42,17 @@ const connectors = connectorsForWallets(
   }
 );
 
+// Suppress WalletConnect analytics warnings for localhost
+if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+  const originalError = console.error;
+  console.error = (...args: unknown[]) => {
+    if (typeof args[0] === "string" && (args[0].includes("not found on Allowlist") || args[0].includes("cloud.reown.com"))) {
+      return; // Suppress WalletConnect allowlist warnings
+    }
+    originalError.apply(console, args);
+  };
+}
+
 const wagmiConfig = createConfig({
   connectors,
   chains: [hardhat, sepolia] as const,
@@ -61,6 +72,7 @@ export function Providers({ children }: Props) {
         <RainbowKitProvider
           theme={darkTheme({ accentColor: "#0f1d40", accentColorForeground: "#f2f7ff" })}
           modalSize="compact"
+          locale="en-US"
         >
           <InMemoryStorageProvider>{children}</InMemoryStorageProvider>
         </RainbowKitProvider>

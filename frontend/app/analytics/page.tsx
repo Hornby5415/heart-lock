@@ -2,14 +2,15 @@
 
 import { usePathname } from "next/navigation";
 import { PageTransition } from "@/components/PageTransition";
-import { DashboardPage } from "@/components/pages/DashboardPage";
+import { AnalyticsPage } from "@/components/pages/AnalyticsPage";
 
-export default function Home() {
+export default function AnalyticsPageRoute() {
   const pathname = usePathname();
 
   return (
-    <PageTransition pathname={pathname || "/"}>
-      <DashboardPage />
+    <PageTransition pathname={pathname || "/analytics"}>
+      <AnalyticsPage />
     </PageTransition>
   );
 }
+

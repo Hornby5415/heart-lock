@@ -13,18 +13,41 @@
 
 :root {
   color-scheme: light;
+  --primary-color: #0f1d40;
+  --secondary-color: #1b58d9;
+  --accent-color: #20c4ff;
+  --gradient-primary: linear-gradient(135deg, #0f1d40 0%, #1b58d9 100%);
+  --gradient-secondary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
 }
 
 body {
-  background-color: #f2f6ff;
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 50%, #f0f4ff 100%);
+  min-height: 100vh;
 }
 
 .bg-radial {
   position: absolute;
   inset: 0;
-  background: radial-gradient(120% 70% at 50% 0%, rgba(15, 29, 64, 0.45), transparent 60%),
-    radial-gradient(65% 80% at 0% 80%, rgba(27, 88, 217, 0.18), transparent 60%),
-    radial-gradient(70% 80% at 100% 80%, rgba(32, 196, 255, 0.15), transparent 62%);
+  background: radial-gradient(120% 70% at 50% 0%, rgba(15, 29, 64, 0.35), transparent 60%),
+    radial-gradient(65% 80% at 0% 80%, rgba(27, 88, 217, 0.15), transparent 60%),
+    radial-gradient(70% 80% at 100% 80%, rgba(32, 196, 255, 0.12), transparent 62%);
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Enhanced card hover effects */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* Custom scrollbar styling */

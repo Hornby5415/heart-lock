@@ -2,14 +2,15 @@
 
 import { usePathname } from "next/navigation";
 import { PageTransition } from "@/components/PageTransition";
-import { DashboardPage } from "@/components/pages/DashboardPage";
+import { DecryptPage } from "@/components/pages/DecryptPage";
 
-export default function Home() {
+export default function DecryptPageRoute() {
   const pathname = usePathname();
 
   return (
-    <PageTransition pathname={pathname || "/"}>
-      <DashboardPage />
+    <PageTransition pathname={pathname || "/decrypt"}>
+      <DecryptPage />
     </PageTransition>
   );
 }
+
